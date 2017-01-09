@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="dskcm_restapi:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="dskcm_rest.war">
+      <element id="artifact" artifact-name="dskcm_restapi:war exploded" />
+    </root>
+  </artifact>
+</component>
