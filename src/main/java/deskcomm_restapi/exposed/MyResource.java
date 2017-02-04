@@ -1,6 +1,5 @@
 package deskcomm_restapi.exposed;
 
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -11,6 +10,7 @@ import javax.ws.rs.core.MediaType;
  */
 @Path("myresource")
 public class MyResource {
+
 
     /**
      * Method handling HTTP GET requests. The returned object will be sent

@@ -5,19 +5,18 @@ import deskcomm_restapi.core.User;
 import deskcomm_restapi.core.UserBuilder;
 import deskcomm_restapi.exceptions.InsufficientParamException;
 import deskcomm_restapi.exceptions.InvalidParamException;
+import org.json.JSONObject;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.MediaType;
 import java.sql.SQLException;
 
 /**
  * Created by Jay Rathod on 06-01-2017.
  */
-@Path("user/register")
+@Path("/user/register")
 public class Registration {
+
 
 
     @POST
@@ -34,19 +33,29 @@ public class Registration {
             builder.setPassword(password);
             builder.setUid(uid);
             builder.setMobile(mobile);
+            builder.setImage_url(imgUrl);
             if (builder.build()) {
-                JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
-                return jsonObjectBuilder.add(Keys.JSON_RESULT, true).add(Keys.JSON_ERROR_TYPE, Keys.ERROR_NONE).build().toString();
+                JSONObject jsonObject = new JSONObject();
+                return jsonObject.accumulate(Keys.JSON_RESULT, true).accumulate(Keys.JSON_ERROR_TYPE, Keys.ERROR_NONE).toString();
             } else {
-                return Json.createObjectBuilder().add(Keys.JSON_RESULT, false).add(Keys.JSON_ERROR_TYPE, Keys.ERROR_UNKNOWN).build().toString();
+                return new JSONObject().accumulate(Keys.JSON_RESULT, false).accumulate(Keys.JSON_ERROR_TYPE, Keys.ERROR_UNKNOWN).toString();
             }
         } catch (InvalidParamException e) {
             e.printStackTrace();
-            JsonObjectBuilder builder = Json.createObjectBuilder().add(Keys.JSON_RESULT, false).add(Keys.JSON_ERROR_TYPE, Keys.ERROR_KNOWN).add(Keys.JSON_MESSAGE, e.getMessage());
-            return builder.build().toString();
+            JSONObject jsonObject = new JSONObject().accumulate(Keys.JSON_RESULT, false).accumulate(Keys.JSON_ERROR_TYPE, Keys.ERROR_KNOWN).accumulate(Keys.JSON_MESSAGE, e.getMessage());
+            return jsonObject.toString();
         } catch (SQLException e) {
             e.printStackTrace();
-            return Json.createObjectBuilder().add(Keys.JSON_RESULT, true).add(Keys.JSON_ERROR_TYPE, Keys.ERROR_KNOWN).add(Keys.JSON_MESSAGE, e.getMessage()).build().toString();
+            String message = e.getMessage();
+            if (e.getMessage().contains("Duplicate")) {
+                if (e.getMessage().contains("email"))
+                    message = "An account with provided email already exists";
+                else if (e.getMessage().contains("mobile"))
+                    message = "An account with provided mobile already exists";
+                else if (e.getMessage().contains("uid"))
+                    message = "An account with provided EID already exists";
+            }
+            return new JSONObject().accumulate(Keys.JSON_RESULT, true).accumulate(Keys.JSON_ERROR_TYPE, Keys.ERROR_KNOWN).accumulate(Keys.JSON_MESSAGE, message).toString();
         }
         //     JsonObjectBuilder builder = Json.createObjectBuilder().add(Keys.JSON_RESULT, false).add(Keys.JSON_ERROR_TYPE, Keys.ERROR_UNKNOWN);
         //    return builder.build();

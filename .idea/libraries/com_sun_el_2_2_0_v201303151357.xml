@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="com.sun.el-2.2.0.v201303151357">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/com.sun.el-2.2.0.v201303151357.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
