@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="org.codehaus.groovy:groovy-all-jdk14:1.6.9" type="repository">
+    <properties maven-id="org.codehaus.groovy:groovy-all-jdk14:1.6.9" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/groovy-all-jdk14-1.6.9.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/junit-3.8.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/ant-1.7.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/ant-launcher-1.7.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

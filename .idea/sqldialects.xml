@@ -3,12 +3,10 @@
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/src/main/java/deskcomm_restapi/core/Event.java" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/deskcomm_restapi/core/Group.java" dialect="MySQL" />
-    <file url="file://$PROJECT_DIR$/src/main/java/deskcomm_restapi/core/Keys.java" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/deskcomm_restapi/core/Message.java" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/deskcomm_restapi/core/User.java" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/deskcomm_restapi/core/UserBuilder.java" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/deskcomm_restapi/dbconn" dialect="MySQL" />
-    <file url="file://$PROJECT_DIR$/src/main/java/deskcomm_restapi/exposed/MyResource.java" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/deskcomm_restapi/exposed/user/ChangeEmail.java" dialect="MySQL" />
   </component>
 </project>
