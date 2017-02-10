@@ -1,4 +1,4 @@
-import deskcomm_restapi.exposed.websocket.WebSocketServerEndpointTest;
+import deskcomm_restapi.exposed.websocket.WebSocketServerEndpoint;
 import org.junit.Test;
 
 /**
@@ -17,7 +17,7 @@ public class WebSocketServerEndpointTestTest {
 
     @Test
     public void onMessage() throws Exception {
-        WebSocketServerEndpointTest test = new WebSocketServerEndpointTest();
+        WebSocketServerEndpoint test = new WebSocketServerEndpoint();
     }
 
     @Test

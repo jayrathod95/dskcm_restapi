@@ -18,7 +18,7 @@ public class GetAllUsers {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     public String getAllUsers(@FormParam(Keys.PARAM.UUID_USER) String uuid, @FormParam(Keys.PARAM.SESSION_ID) String sessionId) {
-
+        
         try {
             if (User.verifySession(uuid, sessionId)) {
                 try {
@@ -29,7 +29,7 @@ public class GetAllUsers {
                     return new SQLExceptionResponse(e.getMessage()).toString();
                 }
             } else {
-                return new SessionVerificationFailedResponse().toString();
+                return new SessionVerificationFailedResponse().getMessage();
             }
         } catch (SQLException e) {
             e.printStackTrace();

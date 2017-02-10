@@ -85,5 +85,6 @@
     <orderEntry type="library" name="Maven: commons-io:commons-io:2.5" level="project" />
     <orderEntry type="library" name="WebSocket-1.0" level="project" />
     <orderEntry type="library" name="org.codehaus.groovy:groovy-all-jdk14:1.6.9" level="project" />
+    <orderEntry type="library" name="mysql-connector-java-5.1.40-bin" level="project" />
   </component>
 </module>

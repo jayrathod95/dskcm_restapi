@@ -47,6 +47,11 @@ public class Keys {
     public static final String HANDSHAKE_REQ = "HANDSHAKE";
     public static final String WS_PATH = "path";
     public static final String WS_BODY = "data";
+    public static final String TO_USER = "_to";
+    public static final String BODY = "body";
+    public static final String MESSAGE_ID = "message_id";
+    public static final String TO_GROUP_ID ="to_group_id" ;
+
 
     public static class JSON {
         public static final String RESULT = "Result";
