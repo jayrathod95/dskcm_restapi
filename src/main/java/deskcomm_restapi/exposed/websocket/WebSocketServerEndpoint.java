@@ -1,8 +1,10 @@
 package deskcomm_restapi.exposed.websocket;
 
+import deskcomm_restapi.core.Identity;
 import deskcomm_restapi.core.Keys;
 import deskcomm_restapi.core.User;
-import deskcomm_restapi.core.messages.Message;
+import deskcomm_restapi.core.messages.GroupMessage;
+import deskcomm_restapi.core.messages.PersonalMessage;
 import deskcomm_restapi.support.L;
 import org.json.JSONObject;
 
@@ -12,7 +14,6 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import java.nio.ByteBuffer;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,33 +40,28 @@ public class WebSocketServerEndpoint {
     public void onClose(Session session) {
         System.out.println("OnClose" + session.getId());
         sessions.remove(session);
-
-
+        User.updateStatusAsOffline(session.getId());
     }
 
     @OnMessage
     public void onMessage(String s, Session session) {
         L.P("OnMessage: WebSocketPacket : ", session.getId(), s);
-        WebSocketMessage webSocketMessage = new WebSocketMessage(s);
+        InboundWebSocketMessage webSocketMessage = new InboundWebSocketMessage(s);
         switch (webSocketMessage.getPath()) {
             case "request/" + Keys.HANDSHAKE_REQ:
-                handleHandShakeMessage(webSocketMessage.getData(), session);
+                handleHandShakeMessage(webSocketMessage.getIdentity(), session);
                 break;
+
             case "message/group":
+                if (webSocketMessage.getIdentity().verify()) {
+                    GroupMessage message = new GroupMessage(webSocketMessage.getData());
+                    message.saveToDatabase();
+                }
                 break;
-            case "message/user":
-                JSONObject data = webSocketMessage.getData();
-                try {
-                    if (User.verifySession(data.getString(Keys.USER_UUID), data.getString(Keys.SESSION_ID))) {
-                        Message<User> userMessage = new Message<>(data.getString(Keys.MESSAGE_ID),
-                                data.getString(Keys.USER_UUID),
-                                data.getString(Keys.TO_USER)
-                                , data.getString(Keys.BODY)
-                        );
-                        userMessage.saveToDatabase();
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
+            case "message/personal":
+                if (webSocketMessage.getIdentity().verify()) {
+                    PersonalMessage message = new PersonalMessage(webSocketMessage.getData());
+                    message.saveToDatabase();
                 }
                 break;
             case "test":
@@ -74,23 +70,17 @@ public class WebSocketServerEndpoint {
 
     }
 
-    private void handleHandShakeMessage(JSONObject data, Session session) {
-        try {
-            String uuid = data.getString(Keys.USER_UUID);
-            String sessionId = data.getString(Keys.SESSION_ID);
-            boolean b = User.verifySession(uuid, sessionId);
-            WebSocketMessage webSocketMessage = new WebSocketMessage();
+    private void handleHandShakeMessage(Identity identity, Session session) {
+        if (identity.verify()) {
+            User user = identity.getUser();
+            boolean b = user.updateStatusAsOnline(session.getId());
+            OutboundWebSocketMessage webSocketMessage = new OutboundWebSocketMessage();
             webSocketMessage.setPath("response/" + Keys.HANDSHAKE_REQ);
             JSONObject jsonObject = new JSONObject();
             jsonObject.put(Keys.JSON_RESULT, b);
             webSocketMessage.setData(jsonObject);
             session.getAsyncRemote().sendText(webSocketMessage.toString());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-
     }
 
 

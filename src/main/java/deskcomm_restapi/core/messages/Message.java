@@ -1,20 +1,15 @@
 package deskcomm_restapi.core.messages;
 
-import deskcomm_restapi.dbconn.DBConnection;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import org.json.JSONObject;
 
 /**
  * Created by Jay Rathod on 10-02-2017.
  */
-public class Message<T> {
-    private String messageId;
-    private String fromUuid;
-    private String toUuid;
-    private String body;
-    private T ignore;
+public abstract class Message {
+    protected String messageId;
+    protected String fromUuid;
+    protected String toUuid;
+    protected String body;
 
     public Message(String messageId, String fromUuid, String toUuid, String body) {
         this.messageId = messageId;
@@ -22,39 +17,14 @@ public class Message<T> {
         this.toUuid = toUuid;
         this.body = body;
 
+
     }
 
-    public boolean saveToDatabase() {
+    abstract public boolean saveToDatabase();
 
-        try {
-            Connection connection = DBConnection.getConnection();
-            connection.setAutoCommit(false);
-            PreparedStatement statement = connection.prepareStatement("INSERT INTO messages(_uuid,data) VALUES(?,?) ");
-            statement.setString(1, messageId);
-            statement.setString(2, body);
-            statement.executeUpdate();
-            int updateCount = statement.getUpdateCount();
-            statement.close();
-            if (updateCount > 0) {
-                PreparedStatement statement1 = connection.prepareStatement("INSERT INTO users_messages(message_id,`_from`,`_to`) VALUES(?,?,?)");
-                statement1.setString(1, messageId);
-                statement1.setString(2, fromUuid);
-                statement1.setString(3, toUuid);
-                statement1.executeUpdate();
-                int updateCount1 = statement1.getUpdateCount();
-                if (updateCount1 > 0) connection.commit();
-                else connection.rollback();
-            } else connection.rollback();
-            connection.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    abstract public JSONObject toJSON();
 
-
-        return false;
-    }
+    abstract public void send();
 
 
     public String getMessageId() {

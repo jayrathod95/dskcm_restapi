@@ -7,8 +7,8 @@ import java.sql.SQLException;
 /**
  * Created by Jay Rathod on 08-01-2017.
  */
-public class DBConnection {
-    private DBConnection() {
+public class DbConnection {
+    private DbConnection() {
 
     }
 

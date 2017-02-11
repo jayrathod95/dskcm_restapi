@@ -1,7 +1,7 @@
 package deskcomm_restapi.exposed.websocket;
 
+import deskcomm_restapi.core.Identity;
 import deskcomm_restapi.core.Keys;
-import deskcomm_restapi.support.PathDecoder;
 import org.json.JSONObject;
 
 import java.util.Map;
@@ -9,20 +9,27 @@ import java.util.Map;
 /**
  * Created by Jay Rathod on 07-02-2017.
  */
-public class WebSocketMessage {
+public class InboundWebSocketMessage {
 
     private JSONObject jsonObject;
     private String path;
+    private Identity identity;
     private JSONObject data;
+
     private Map<Integer, String> pathDecomposed;
 
-    public WebSocketMessage(String wholeMessageJsonString) {
+    public InboundWebSocketMessage(String wholeMessageJsonString) {
         jsonObject = new JSONObject(wholeMessageJsonString);
         path = jsonObject.getString(Keys.PATH);
-        data = jsonObject.getJSONObject(Keys.DATA);
+        if (jsonObject.has(Keys.WS_IDENTITY)) {
+            JSONObject identityJSON = jsonObject.getJSONObject(Keys.WS_IDENTITY);
+            identity = new Identity(identityJSON);
+        }
+        if (jsonObject.has(Keys.DATA))
+            data = jsonObject.getJSONObject(Keys.DATA);
     }
 
-    public WebSocketMessage() {
+    public InboundWebSocketMessage() {
     }
 
 
@@ -38,18 +45,6 @@ public class WebSocketMessage {
         return data;
     }
 
-    public Map<Integer, String> getPathDecomposed() {
-        return PathDecoder.getPathParams(path);
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-
-    public void setData(JSONObject data) {
-        this.data = data;
-    }
 
     @Override
     public String toString() {
@@ -57,5 +52,9 @@ public class WebSocketMessage {
         jsonObject.put(Keys.PATH, path);
         jsonObject.put(Keys.DATA, data);
         return jsonObject.toString();
+    }
+
+    public Identity getIdentity() {
+        return identity;
     }
 }

@@ -1,6 +1,6 @@
 package deskcomm_restapi.core;
 
-import deskcomm_restapi.dbconn.DBConnection;
+import deskcomm_restapi.dbconn.DbConnection;
 import deskcomm_restapi.exceptions.InvalidParamException;
 
 import java.sql.Connection;
@@ -8,7 +8,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.UUID;
 
-/**aaaaaaaaaaaaaaa
+/**
+ * aaaaaaaaaaaaaaa
  * Created by Jay Rathod on 07-01-2017.
  */
 public class UserBuilder {
@@ -34,13 +35,16 @@ public class UserBuilder {
 
     }
 
+    @SuppressWarnings("Duplicates")
     public boolean build() throws SQLException {
 
-        Connection connection = DBConnection.getConnection();
+        Connection connection = DbConnection.getConnection();
+        connection.setAutoCommit(false);
         PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
                 "users(`_uuid`,fname,lname,email,mobile,password,img_url,`_uid`)" +
                 "VALUES(?,?,?,?,?,?,?,?)");
-        statement.setString(1, UUID.randomUUID().toString());
+        String uuid = UUID.randomUUID().toString();
+        statement.setString(1, uuid);
         statement.setString(2, firstname);
         statement.setString(3, lastname);
         statement.setString(4, email);
@@ -48,8 +52,32 @@ public class UserBuilder {
         statement.setString(6, password);
         statement.setString(7, image_url);
         statement.setString(8, uid);
-        return statement.executeUpdate() == 1;
+        statement.executeUpdate();
+        int updateCount = statement.getUpdateCount();
+        if (updateCount > 0) {
+            statement.close();
+            PreparedStatement statement1 = connection.prepareStatement("INSERT INTO user_status(user_id,  ws_session_id) VALUE (?,?)");
+            statement1.setString(1, uuid);
+            statement1.setString(2, uuid.substring(0, 30));
+            statement1.executeUpdate();
+            int updateCount1 = statement1.getUpdateCount();
+            if (updateCount1 > 0) {
+                connection.commit();
+                statement1.close();
+                connection.close();
+                return true;
+            } else {
+                connection.rollback();
+                statement1.close();
+                connection.close();
+                return false;
+            }
+        }
+        connection.rollback();
+        statement.close();
+        connection.close();
 
+        return false;
     }
 
     public void setFirstname(String firstname) throws InvalidParamException {

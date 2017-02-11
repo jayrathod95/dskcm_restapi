@@ -46,11 +46,18 @@ public class Keys {
     public static final String REQUEST_CODE = "request_code";
     public static final String HANDSHAKE_REQ = "HANDSHAKE";
     public static final String WS_PATH = "path";
-    public static final String WS_BODY = "data";
+    public static final String WS_DATA = "data";
     public static final String TO_USER = "_to";
     public static final String BODY = "body";
     public static final String MESSAGE_ID = "message_id";
-    public static final String TO_GROUP_ID ="to_group_id" ;
+    public static final String TO_GROUP_ID = "to_group_id";
+    public static final String MESSAGE_FROM = "from";
+
+    public static final String MESSAGE_TO = "_to";
+
+    public static final String MESSAGE_BODY = "body";
+
+    public static final String WS_IDENTITY = "identity";
 
 
     public static class JSON {

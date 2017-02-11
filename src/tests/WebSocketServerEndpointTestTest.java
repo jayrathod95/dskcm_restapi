@@ -1,4 +1,3 @@
-import deskcomm_restapi.exposed.websocket.WebSocketServerEndpoint;
 import org.junit.Test;
 
 /**
@@ -17,12 +16,13 @@ public class WebSocketServerEndpointTestTest {
 
     @Test
     public void onMessage() throws Exception {
-        WebSocketServerEndpoint test = new WebSocketServerEndpoint();
     }
 
     @Test
     public void onMessage1() throws Exception {
 
     }
+
+
 
 }

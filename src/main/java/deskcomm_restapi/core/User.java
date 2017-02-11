@@ -2,7 +2,7 @@ package deskcomm_restapi.core;
 
 import com.sun.istack.internal.Nullable;
 import com.sun.org.glassfish.gmbal.Description;
-import deskcomm_restapi.dbconn.DBConnection;
+import deskcomm_restapi.dbconn.DbConnection;
 import deskcomm_restapi.exceptions.LoginException;
 import deskcomm_restapi.exceptions.OperationFailedException;
 import org.json.JSONArray;
@@ -30,6 +30,9 @@ public class User {
     private String gender;
     private String created;
     private JSONObject jsonObject;
+    private String status;
+    private String wsSessionId;
+    private String statusAsOnline;
 
 
     public User(@Nullable String uuid) {
@@ -38,7 +41,7 @@ public class User {
 
 
     public boolean changePassword(String oldPassword, String newPassword) throws SQLException {
-        Connection connection = DBConnection.getConnection();
+        Connection connection = DbConnection.getConnection();
         PreparedStatement statement = connection.prepareStatement("UPDATE users SET password=? WHERE `_uuid`=? AND password=?");
         statement.setString(1, newPassword);
         statement.setString(2, uuid);
@@ -60,7 +63,7 @@ public class User {
     }
 
     public static User login(String email, String password) throws SQLException, LoginException {
-        Connection connection = DBConnection.getConnection();
+        Connection connection = DbConnection.getConnection();
         PreparedStatement statement = connection.prepareStatement("SELECT _uuid,fname,lname,gender,email,mobile,password,img_url,created,_uid FROM users WHERE email=? AND password=?");
         statement.setString(1, email);
         statement.setString(2, password);
@@ -90,7 +93,7 @@ public class User {
     }
 
     private boolean updateSessionId(String sessionId) throws SQLException {
-        Connection connection = DBConnection.getConnection();
+        Connection connection = DbConnection.getConnection();
         PreparedStatement statement = connection.prepareStatement("UPDATE users SET session_id=? WHERE `_uuid`=?");
         statement.setString(1, sessionId);
         statement.setString(2, this.uuid);
@@ -123,7 +126,7 @@ public class User {
     }
 
     public static JSONArray getAllUsers() throws SQLException {
-        Connection connection = DBConnection.getConnection();
+        Connection connection = DbConnection.getConnection();
         PreparedStatement statement = connection.prepareStatement(
                 "SELECT `_uuid`,fname,lname,gender,email,img_url FROM users");
         ResultSet resultSet = statement.executeQuery();
@@ -218,7 +221,7 @@ public class User {
     }
 
     public boolean updateEmail(String uuid, String password, String newEmail) throws SQLException {
-        Connection connection = DBConnection.getConnection();
+        Connection connection = DbConnection.getConnection();
         PreparedStatement statement = connection.prepareStatement("UPDATE users SET email=? WHERE `_uuid`=? AND password=?");
         statement.setString(1, newEmail);
         statement.setString(2, uuid);
@@ -231,7 +234,7 @@ public class User {
         return sessionId;
     }
 
-    private void setSessionId(String sessionId) {
+    protected void setSessionId(String sessionId) {
         this.sessionId = sessionId;
     }
 
@@ -244,20 +247,20 @@ public class User {
     }
 
     public static boolean verifySession(String uuid, String sessionId) throws SQLException {
-            Connection connection = DBConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement("SELECT count(1) AS result FROM users WHERE `_uuid`=? AND session_id=?");
-            statement.setString(1, uuid);
-            statement.setString(2, sessionId);
-            ResultSet resultSet = statement.executeQuery();
-            resultSet.next();
-            boolean result = resultSet.getInt(1) > 0;
-            statement.close();
-            connection.close();
-            return result;
+        Connection connection = DbConnection.getConnection();
+        PreparedStatement statement = connection.prepareStatement("SELECT count(1) AS result FROM users WHERE `_uuid`=? AND session_id=?");
+        statement.setString(1, uuid);
+        statement.setString(2, sessionId);
+        ResultSet resultSet = statement.executeQuery();
+        resultSet.next();
+        boolean result = resultSet.getInt(1) > 0;
+        statement.close();
+        connection.close();
+        return result;
     }
 
     public boolean fetch() throws SQLException {
-        Connection connection = DBConnection.getConnection();
+        Connection connection = DbConnection.getConnection();
         PreparedStatement statement = connection.prepareStatement("SELECT fname,lname,email,mobile,img_url,created FROM users WHERE `_uuid`=?");
         statement.setString(1, uuid);
         ResultSet resultSet = statement.executeQuery();
@@ -277,7 +280,7 @@ public class User {
     }
 
     public void updateImageURL(String newImageUrl) throws SQLException, OperationFailedException {
-        Connection connection = DBConnection.getConnection();
+        Connection connection = DbConnection.getConnection();
         PreparedStatement statement = connection.prepareStatement("UPDATE users SET img_url=? WHERE `_uuid`=? AND session_id=?");
         statement.setString(1, newImageUrl);
         statement.setString(2, uuid);
@@ -290,6 +293,102 @@ public class User {
                 throw new OperationFailedException("Session Id not provided");
             else
                 throw new OperationFailedException("Unable to update image url");
+        }
+    }
+
+
+
+    public boolean isOnline() {
+        boolean b = false;
+        try {
+            Connection connection = DbConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement("SELECT status FROM user_status WHERE user_id=?");
+            statement.setString(1, uuid);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) b = resultSet.getString(1).equals("1");
+            resultSet.close();
+            statement.close();
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return b;
+    }
+
+
+    public String getWsSessionId() {
+        return wsSessionId;
+    }
+
+    public void setWsSessionId(String wsSessionId) {
+        this.wsSessionId = wsSessionId;
+    }
+
+    public boolean updateStatusAsOnline(String wsSessionId) {
+        this.wsSessionId = wsSessionId;
+        Connection connection = null;
+        try {
+            connection = DbConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement("UPDATE user_status SET status='1',ws_session_id=? WHERE user_id=?");
+            statement.setString(1, wsSessionId);
+            statement.setString(2, uuid);
+            statement.executeUpdate();
+            int updateCount = statement.getUpdateCount();
+            statement.close();
+            connection.close();
+            return updateCount > 0;
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static User getUserWithWsSessionId(String wsSessionId) throws NoUserFoundException {
+        try {
+            Connection connection = DbConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement("SELECT user_id FROM user_status WHERE ws_session_id=?");
+            statement.setString(1, wsSessionId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return new User(resultSet.getString(1));
+            } else throw new NoUserFoundException("No user found with wsSessionId " + wsSessionId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    public static boolean updateStatusAsOffline(String wsSessionId) {
+        try {
+            Connection connection = DbConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement("UPDATE user_status SET status='0',ws_session_id=SUBSTR(ws_session_id,1,30) WHERE ws_session_id=?");
+            statement.setString(1, wsSessionId);
+            statement.executeUpdate();
+            int updateCount = statement.getUpdateCount();
+            statement.close();
+            connection.close();
+            return updateCount > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public static class NoUserFoundException extends Throwable {
+        private String message;
+
+        public NoUserFoundException(String message) {
+
+            this.message = message;
+        }
+
+        @Override
+        public String getMessage() {
+            return message;
         }
     }
 }
