@@ -1,9 +1,13 @@
 package deskcomm_restapi.core.messages;
 
 import deskcomm_restapi.core.Keys;
+import deskcomm_restapi.core.User;
 import deskcomm_restapi.dbconn.DbConnection;
+import deskcomm_restapi.exposed.websocket.OutboundWebSocketMessage;
+import deskcomm_restapi.exposed.websocket.WebSocketServerEndpoint;
 import org.json.JSONObject;
 
+import javax.websocket.Session;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -71,8 +75,17 @@ public class PersonalMessage extends Message {
                 .put(Keys.MESSAGE_BODY, body);
     }
 
-    @Override
-    public void send() {
 
+    @Override
+    public void dispatch() {
+
+        OutboundWebSocketMessage message = new OutboundWebSocketMessage("message/personal", toJSON());
+
+        User toUser = new User(toUuid);
+        if (toUser.isOnline()) {
+            Session session = WebSocketServerEndpoint.getSessionById(toUser.getWsSessionId());
+            if (session != null)
+                session.getAsyncRemote().sendText(message.toString());
+        }
     }
 }

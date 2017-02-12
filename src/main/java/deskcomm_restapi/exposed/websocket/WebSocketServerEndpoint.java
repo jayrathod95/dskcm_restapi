@@ -14,8 +14,8 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import java.nio.ByteBuffer;
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -28,7 +28,8 @@ import java.util.Set;
 )
 
 public class WebSocketServerEndpoint {
-    private static final Set<Session> sessions = Collections.synchronizedSet(new HashSet<Session>());
+    //private static final Set<Session> sessions = Collections.synchronizedSet(new HashSet<Session>());
+    private static Set<Session> sessions = new HashSet<>();
 
     @OnOpen
     public void onOpen(Session session) {
@@ -62,6 +63,7 @@ public class WebSocketServerEndpoint {
                 if (webSocketMessage.getIdentity().verify()) {
                     PersonalMessage message = new PersonalMessage(webSocketMessage.getData());
                     message.saveToDatabase();
+                    message.dispatch();
                 }
                 break;
             case "test":
@@ -96,6 +98,18 @@ public class WebSocketServerEndpoint {
             }
         }
         */
+    }
+
+    public static Session getSessionById(String wsSessionId) {
+        Iterator<Session> iterator = sessions.iterator();
+        while (iterator.hasNext()) {
+            Session session = iterator.next();
+            String id = session.getId();
+            if (id.equals(wsSessionId)) {
+                return session;
+            }
+        }
+        return null;
     }
 
 

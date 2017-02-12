@@ -69,8 +69,9 @@ public class GroupMessage extends Message {
                 .put(MESSAGE_BODY, body);
     }
 
+
     @Override
-    public void send() {
+    public void dispatch() {
 
     }
 

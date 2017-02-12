@@ -24,8 +24,6 @@ public abstract class Message {
 
     abstract public JSONObject toJSON();
 
-    abstract public void send();
-
 
     public String getMessageId() {
         return messageId;
@@ -58,4 +56,6 @@ public abstract class Message {
     public void setBody(String body) {
         this.body = body;
     }
+
+    public abstract void dispatch();
 }

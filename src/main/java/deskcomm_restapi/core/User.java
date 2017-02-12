@@ -297,15 +297,17 @@ public class User {
     }
 
 
-
     public boolean isOnline() {
         boolean b = false;
         try {
             Connection connection = DbConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement("SELECT status FROM user_status WHERE user_id=?");
+            PreparedStatement statement = connection.prepareStatement("SELECT status,ws_session_id FROM user_status WHERE user_id=?");
             statement.setString(1, uuid);
             ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) b = resultSet.getString(1).equals("1");
+            if (resultSet.next()) {
+                b = resultSet.getString(1).equals("1");
+                this.wsSessionId=resultSet.getString(2);
+            }
             resultSet.close();
             statement.close();
             statement.close();
@@ -391,4 +393,24 @@ public class User {
             return message;
         }
     }
+/*
+    public DispatchQueue getDispatchQueue() {
+        return new DispatchQueue();
+    }
+
+
+    private class DispatchQueue {
+
+        DispatchQueue() {
+        }
+
+
+        public void add(Message message) {
+            message.saveToDatabase();
+            message.send();
+        }
+
+
+    }
+    */
 }
