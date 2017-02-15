@@ -58,6 +58,7 @@ public class Keys {
     public static final String MESSAGE_BODY = "body";
 
     public static final String WS_IDENTITY = "identity";
+    public static final String GROUP_CREATED_BY = "created_by";
 
 
     public static class JSON {

@@ -1,5 +1,6 @@
 package deskcomm_restapi.core.messages;
 
+import com.sun.istack.internal.Nullable;
 import deskcomm_restapi.core.Keys;
 import deskcomm_restapi.core.User;
 import deskcomm_restapi.dbconn.DbConnection;
@@ -11,18 +12,25 @@ import javax.websocket.Session;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.UUID;
 
 import static deskcomm_restapi.core.Keys.*;
 
 /**
  * Created by Jay Rathod on 10-02-2017.
  */
-public class PersonalMessage extends Message {
-    public PersonalMessage(String messageId, String fromUuid, String toUuid, String body) {
+public class InboundPersonalMessage extends Message {
+
+    @Nullable //This will have value only after saveToDatabase() is called
+    private Timestamp serverTimeStamp;
+
+    public InboundPersonalMessage(String messageId, String fromUuid, String toUuid, String body) {
         super(messageId, fromUuid, toUuid, body);
     }
 
-    public PersonalMessage(JSONObject jsonObject) {
+    public InboundPersonalMessage(JSONObject jsonObject) {
         super(jsonObject.getString(MESSAGE_ID), jsonObject.getString(MESSAGE_FROM), jsonObject.getString(MESSAGE_TO), jsonObject.getString(MESSAGE_BODY));
     }
 
@@ -31,17 +39,22 @@ public class PersonalMessage extends Message {
         try {
             Connection connection = DbConnection.getConnection();
             connection.setAutoCommit(false);
-            PreparedStatement statement = connection.prepareStatement("INSERT INTO messages(_uuid,data) VALUES(?,?) ");
-            statement.setString(1, this.messageId);
+            serverTimeStamp = new Timestamp(new Date().getTime());
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO message_data(_uuid,data,created) VALUES(?,?,?) ");
+            String randomId = UUID.randomUUID().toString() + UUID.randomUUID().toString();
+            statement.setString(1, randomId);
             statement.setString(2, this.body);
+            statement.setTimestamp(3, serverTimeStamp);
             statement.executeUpdate();
             int updateCount = statement.getUpdateCount();
             statement.close();
             if (updateCount > 0) {
-                PreparedStatement statement1 = connection.prepareStatement("INSERT INTO users_messages(message_id,`_from`,`_to`) VALUES(?,?,?)");
-                statement1.setString(1, this.messageId);
-                statement1.setString(2, this.fromUuid);
-                statement1.setString(3, this.toUuid);
+                PreparedStatement statement1 = connection.prepareStatement("INSERT INTO users_messages(`_uuid`,data_id,`_from`,`_to`,created) VALUES(?,?,?,?,?)");
+                statement1.setString(1, messageId);
+                statement1.setString(2, randomId);
+                statement1.setString(3, this.fromUuid);
+                statement1.setString(4, this.toUuid);
+                statement1.setTimestamp(5, serverTimeStamp);
                 statement1.executeUpdate();
                 int updateCount1 = statement1.getUpdateCount();
                 if (updateCount1 > 0) {
@@ -72,7 +85,8 @@ public class PersonalMessage extends Message {
                 .put(Keys.MESSAGE_ID, messageId)
                 .put(Keys.MESSAGE_FROM, fromUuid)
                 .put(Keys.MESSAGE_TO, toUuid)
-                .put(Keys.MESSAGE_BODY, body);
+                .put(Keys.MESSAGE_BODY, body)
+                .put(Keys.SERVER_TIMESTAMP, serverTimeStamp.toString());
     }
 
 
@@ -80,6 +94,7 @@ public class PersonalMessage extends Message {
     public void dispatch() {
 
         OutboundWebSocketMessage message = new OutboundWebSocketMessage("message/personal", toJSON());
+
 
         User toUser = new User(toUuid);
         if (toUser.isOnline()) {

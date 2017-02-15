@@ -1,6 +1,7 @@
 package deskcomm_restapi.exposed.websocket;
 
 import deskcomm_restapi.core.Keys;
+import deskcomm_restapi.core.User;
 import org.json.JSONObject;
 
 import javax.websocket.Session;
@@ -11,6 +12,8 @@ import javax.websocket.Session;
 public class OutboundWebSocketMessage {
     private String path;
     private JSONObject data;
+    private User user;
+    private User toUser;
 
     public OutboundWebSocketMessage(String path, JSONObject data) {
         this.path = path;
@@ -40,5 +43,22 @@ public class OutboundWebSocketMessage {
 
     public void send(Session session) {
         session.getAsyncRemote().sendText(toString());
+    }
+
+    public void dispatch(Session session) {
+
+    }
+
+    public void dispatch() {
+        if (toUser.isOnline()) {
+            Session session = WebSocketServerEndpoint.getSessionById(toUser.getWsSessionId());
+            if (session != null)
+                session.getAsyncRemote().sendText(this.toString());
+        }
+    }
+
+    public void setTo(User toUser) {
+        this.toUser = toUser;
+
     }
 }

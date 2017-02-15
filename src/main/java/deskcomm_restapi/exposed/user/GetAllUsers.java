@@ -18,7 +18,7 @@ public class GetAllUsers {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     public String getAllUsers(@FormParam(Keys.PARAM.UUID_USER) String uuid, @FormParam(Keys.PARAM.SESSION_ID) String sessionId) {
-        
+
         try {
             if (User.verifySession(uuid, sessionId)) {
                 try {

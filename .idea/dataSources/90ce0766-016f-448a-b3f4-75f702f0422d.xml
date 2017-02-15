@@ -21,8 +21,8 @@
     <table id="15" parent="2" name="group_members"/>
     <table id="16" parent="2" name="group_message_delivery_info"/>
     <table id="17" parent="2" name="groups_messages"/>
-    <table id="18" parent="2" name="message_type"/>
-    <table id="19" parent="2" name="messages"/>
+    <table id="18" parent="2" name="message_data"/>
+    <table id="19" parent="2" name="message_type"/>
     <table id="20" parent="2" name="user_status"/>
     <table id="21" parent="2" name="user_type"/>
     <table id="22" parent="2" name="users"/>
@@ -143,8 +143,9 @@
     </column>
     <column id="47" parent="15" name="user_type">
       <Position>2</Position>
-      <DataType>int(10) unsigned|0</DataType>
+      <DataType>enum(&apos;1&apos;, &apos;0&apos;)|0</DataType>
       <NotNull>1</NotNull>
+      <DefaultExpression>&apos;0&apos;</DefaultExpression>
     </column>
     <column id="48" parent="15" name="created">
       <Position>3</Position>
@@ -276,59 +277,59 @@ user_id</ColNames>
     <foreign-key id="75" parent="17" name="groups_messages_ibfk_4">
       <ColNames>message_id</ColNames>
       <RefSchemaName>deskcomm</RefSchemaName>
-      <RefTableName>messages</RefTableName>
+      <RefTableName>message_data</RefTableName>
       <RefColNames>_uuid</RefColNames>
     </foreign-key>
-    <column id="76" parent="18" name="id">
-      <Position>1</Position>
-      <DataType>int(10) unsigned|0</DataType>
-      <NotNull>1</NotNull>
-      <SequenceIdentity>1</SequenceIdentity>
-    </column>
-    <column id="77" parent="18" name="description">
-      <Position>2</Position>
-      <DataType>varchar(32)|0</DataType>
-      <NotNull>1</NotNull>
-    </column>
-    <key id="78" parent="18" name="PRIMARY">
-      <ColNames>id</ColNames>
-      <Primary>1</Primary>
-    </key>
-    <column id="79" parent="19" name="_uuid">
+    <column id="76" parent="18" name="_uuid">
       <Position>1</Position>
       <DataType>varchar(128)|0</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="80" parent="19" name="msg_type">
+    <column id="77" parent="18" name="msg_type">
       <Position>2</Position>
       <DataType>int(10) unsigned|0</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>&apos;1&apos;</DefaultExpression>
     </column>
-    <column id="81" parent="19" name="data">
+    <column id="78" parent="18" name="data">
       <Position>3</Position>
       <DataType>text|0</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="82" parent="19" name="created">
+    <column id="79" parent="18" name="created">
       <Position>4</Position>
       <DataType>timestamp|0</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
     </column>
-    <index id="83" parent="19" name="msg_type">
+    <index id="80" parent="18" name="msg_type">
       <ColNames>msg_type</ColNames>
     </index>
-    <key id="84" parent="19" name="PRIMARY">
+    <key id="81" parent="18" name="PRIMARY">
       <ColNames>_uuid</ColNames>
       <Primary>1</Primary>
     </key>
-    <foreign-key id="85" parent="19" name="messages_ibfk_1">
+    <foreign-key id="82" parent="18" name="message_data_ibfk_1">
       <ColNames>msg_type</ColNames>
       <RefSchemaName>deskcomm</RefSchemaName>
       <RefTableName>message_type</RefTableName>
       <RefColNames>id</RefColNames>
     </foreign-key>
+    <column id="83" parent="19" name="id">
+      <Position>1</Position>
+      <DataType>int(10) unsigned|0</DataType>
+      <NotNull>1</NotNull>
+      <SequenceIdentity>1</SequenceIdentity>
+    </column>
+    <column id="84" parent="19" name="description">
+      <Position>2</Position>
+      <DataType>varchar(32)|0</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <key id="85" parent="19" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Primary>1</Primary>
+    </key>
     <column id="86" parent="20" name="user_id">
       <Position>1</Position>
       <DataType>varchar(64)|0</DataType>
@@ -478,46 +479,54 @@ user_id</ColNames>
       <DataType>varchar(64)|0</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="119" parent="23" name="message_id">
-      <Position>1</Position>
-      <DataType>varchar(128)|0</DataType>
-      <NotNull>1</NotNull>
-    </column>
-    <column id="120" parent="23" name="created">
+    <column id="119" parent="23" name="created">
       <Position>4</Position>
       <DataType>timestamp|0</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
     </column>
-    <column id="121" parent="23" name="delivery_status">
+    <column id="120" parent="23" name="delivery_status">
       <Position>5</Position>
       <DataType>enum(&apos;1&apos;, &apos;0&apos;)|0</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>&apos;0&apos;</DefaultExpression>
     </column>
-    <index id="122" parent="23" name="_from">
+    <column id="121" parent="23" name="_uuid">
+      <Position>6</Position>
+      <DataType>varchar(128)|0</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <column id="122" parent="23" name="data_id">
+      <Position>1</Position>
+      <DataType>varchar(128)|0</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <index id="123" parent="23" name="_from">
       <ColNames>_from</ColNames>
     </index>
-    <index id="123" parent="23" name="_to">
+    <index id="124" parent="23" name="_to">
       <ColNames>_to</ColNames>
     </index>
-    <key id="124" parent="23" name="PRIMARY">
-      <ColNames>message_id</ColNames>
+    <index id="125" parent="23" name="message_id">
+      <ColNames>data_id</ColNames>
+    </index>
+    <key id="126" parent="23" name="PRIMARY">
+      <ColNames>_uuid</ColNames>
       <Primary>1</Primary>
     </key>
-    <foreign-key id="125" parent="23" name="users_messages_ibfk_1">
-      <ColNames>message_id</ColNames>
+    <foreign-key id="127" parent="23" name="users_messages_ibfk_4">
+      <ColNames>data_id</ColNames>
       <RefSchemaName>deskcomm</RefSchemaName>
-      <RefTableName>messages</RefTableName>
+      <RefTableName>message_data</RefTableName>
       <RefColNames>_uuid</RefColNames>
     </foreign-key>
-    <foreign-key id="126" parent="23" name="users_messages_ibfk_2">
+    <foreign-key id="128" parent="23" name="users_messages_ibfk_2">
       <ColNames>_from</ColNames>
       <RefSchemaName>deskcomm</RefSchemaName>
       <RefTableName>users</RefTableName>
       <RefColNames>_uuid</RefColNames>
     </foreign-key>
-    <foreign-key id="127" parent="23" name="users_messages_ibfk_3">
+    <foreign-key id="129" parent="23" name="users_messages_ibfk_3">
       <ColNames>_to</ColNames>
       <RefSchemaName>deskcomm</RefSchemaName>
       <RefTableName>users</RefTableName>

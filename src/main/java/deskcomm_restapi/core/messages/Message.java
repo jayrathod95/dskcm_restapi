@@ -16,8 +16,6 @@ public abstract class Message {
         this.fromUuid = fromUuid;
         this.toUuid = toUuid;
         this.body = body;
-
-
     }
 
     abstract public boolean saveToDatabase();

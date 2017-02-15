@@ -12,13 +12,13 @@ import static deskcomm_restapi.core.Keys.*;
 /**
  * Created by Jay Rathod on 10-02-2017.
  */
-public class GroupMessage extends Message {
+public class InboundGroupMessage extends Message {
 
-    public GroupMessage(String messageId, String fromUuid, String toUuid, String body) {
+    public InboundGroupMessage(String messageId, String fromUuid, String toUuid, String body) {
         super(messageId, fromUuid, toUuid, body);
     }
 
-    public GroupMessage(JSONObject jsonObject) {
+    public InboundGroupMessage(JSONObject jsonObject) {
         super(jsonObject.getString(MESSAGE_ID), jsonObject.getString(MESSAGE_FROM), jsonObject.getString(MESSAGE_TO), jsonObject.getString(MESSAGE_BODY));
     }
 
@@ -27,7 +27,7 @@ public class GroupMessage extends Message {
         try {
             Connection connection = DbConnection.getConnection();
             connection.setAutoCommit(false);
-            PreparedStatement statement = connection.prepareStatement("INSERT INTO messages(_uuid,data) VALUES(?,?) ");
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO message_data(_uuid,data) VALUES(?,?) ");
             statement.setString(1, messageId);
             statement.setString(2, body);
             statement.executeUpdate();
