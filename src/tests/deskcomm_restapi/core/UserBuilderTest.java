@@ -15,7 +15,6 @@ public class UserBuilderTest {
             builder.setLastname("Lachure");
             builder.setImage_url("aaaaaaaaaaaaaaa");
             builder.setMobile("1111111111111");
-            builder.setUid("121212");
             builder.setPassword("12345");
             builder.setEmail("sl@sl.com");
             builder.build();

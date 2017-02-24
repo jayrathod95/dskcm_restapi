@@ -11,7 +11,6 @@ public class Keys {
     final public static String USER_PASSWORD = "password";
     final public static String USER_IMG_URL = "img_url";
     final public static String USER_CREATED = "created";
-    final public static String USER_UID = "_uid";
     public static final int ERROR_NONE = 0;
     public static final int ERROR_KNOWN = 1;
     public static final int ERROR_UNKNOWN = 2;
@@ -59,7 +58,15 @@ public class Keys {
 
     public static final String WS_IDENTITY = "identity";
     public static final String GROUP_CREATED_BY = "created_by";
-
+    public static final String EVENT_TITLE = "title";
+    public static final String EVENT_STARTS = "starts";
+    public static final String EVENT_ENDS = "ends";
+    public static final String EVENT_VENUE = "venue";
+    public static final String EVENT_ORGS = "org_ids";
+    public static final String EVENT_DESC = "description";
+    public static final String EVENT_IMAGE_URL = "img_url";
+    public static final String EVENT_CREATED_BY = "created_by";
+    public static final String EVENT_ID = "id";
 
     public static class JSON {
         public static final String RESULT = "Result";
@@ -68,7 +75,6 @@ public class Keys {
         public static final String DATA = "data";
         public static final String SESSION_ID = "session_id";
         public static String MESSAGE = "Message";
-
     }
 
     public class PARAM {
@@ -78,7 +84,6 @@ public class Keys {
         public static final String LASTNAME = "lname";
         public static final String EMAIL = "email";
         public static final String MOBILE = "mobile";
-        public static final String EID = "_uid";
         public static final String PASSWORD = "password";
     }
 }

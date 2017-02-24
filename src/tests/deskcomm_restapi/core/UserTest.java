@@ -12,56 +12,7 @@ public class UserTest {
     @Test
     public void getUnreadPersonalMessages() throws Exception {
         Timestamp from = new Timestamp(new Date().getTime());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
-        System.out.println(from.toString());
+
 
     }
-
 }

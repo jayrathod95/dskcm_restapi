@@ -12,10 +12,9 @@ import javax.websocket.Session;
 public class OutboundWebSocketMessage {
     private String path;
     private JSONObject data;
-    private User user;
     private User toUser;
 
-    public OutboundWebSocketMessage(String path, JSONObject data) {
+    public OutboundWebSocketMessage(String path, JSONObject data, User user) {
         this.path = path;
         this.data = data;
     }
@@ -45,9 +44,6 @@ public class OutboundWebSocketMessage {
         session.getAsyncRemote().sendText(toString());
     }
 
-    public void dispatch(Session session) {
-
-    }
 
     public void dispatch() {
         if (toUser.isOnline()) {

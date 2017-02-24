@@ -19,16 +19,16 @@ public class UserBuilder {
     private String mobile;
     private String password;
     private String image_url;
-    private String uid;
+    private String gender;
 
-    public UserBuilder(String firstname, String lastname, String email, String mobile, String password, String image_url, String uid) {
+    public UserBuilder(String firstname, String lastname, String email, String mobile, String password, String image_url, String gender) {
         this.email = email;
         this.mobile = mobile;
         this.password = password;
         this.image_url = image_url;
-        this.uid = uid;
         this.firstname = firstname;
         this.lastname = lastname;
+        this.gender = gender;
     }
 
     public UserBuilder() {
@@ -41,7 +41,7 @@ public class UserBuilder {
         Connection connection = DbConnection.getConnection();
         connection.setAutoCommit(false);
         PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
-                "users(`_uuid`,fname,lname,email,mobile,password,img_url,`_uid`)" +
+                "users(`_uuid`,fname,lname,email,mobile,password,img_url,gender)" +
                 "VALUES(?,?,?,?,?,?,?,?)");
         String uuid = UUID.randomUUID().toString();
         statement.setString(1, uuid);
@@ -51,7 +51,7 @@ public class UserBuilder {
         statement.setString(5, mobile);
         statement.setString(6, password);
         statement.setString(7, image_url);
-        statement.setString(8, uid);
+        statement.setString(8, gender);
         statement.executeUpdate();
         int updateCount = statement.getUpdateCount();
         if (updateCount > 0) {
@@ -76,8 +76,11 @@ public class UserBuilder {
         connection.rollback();
         statement.close();
         connection.close();
-
         return false;
+    }
+
+    public String getFirstname() {
+        return firstname;
     }
 
     public void setFirstname(String firstname) throws InvalidParamException {
@@ -87,18 +90,14 @@ public class UserBuilder {
 
     }
 
+    public String getLastname() {
+        return lastname;
+    }
+
     public void setLastname(String lastname) throws InvalidParamException {
         if (lastname.length() > 0)
             this.lastname = lastname;
         else throw new InvalidParamException("Lastname");
-    }
-
-    public String getFirstname() {
-        return firstname;
-    }
-
-    public String getLastname() {
-        return lastname;
     }
 
     public String getEmail() {
@@ -144,13 +143,8 @@ public class UserBuilder {
 
     }
 
-    public String getUid() {
-        return uid;
-    }
 
-    public void setUid(String uid) throws InvalidParamException {
-        if (uid.length() > 0)
-            this.uid = uid;
-        else throw new InvalidParamException("UID");
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 }

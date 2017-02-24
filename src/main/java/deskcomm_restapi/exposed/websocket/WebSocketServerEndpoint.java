@@ -1,9 +1,6 @@
 package deskcomm_restapi.exposed.websocket;
 
-import deskcomm_restapi.core.Group;
-import deskcomm_restapi.core.Identity;
-import deskcomm_restapi.core.Keys;
-import deskcomm_restapi.core.User;
+import deskcomm_restapi.core.*;
 import deskcomm_restapi.core.messages.InboundGroupMessage;
 import deskcomm_restapi.core.messages.InboundPersonalMessage;
 import deskcomm_restapi.core.messages.OutboundPersonalMessage;
@@ -37,6 +34,18 @@ public class WebSocketServerEndpoint {
     private static Set<Session> sessions = new HashSet<>();
     private Object groupCreationSuccessfulResponse;
     private Object groupCreationFailedResponse;
+
+    public static Session getSessionById(String wsSessionId) {
+        Iterator<Session> iterator = sessions.iterator();
+        while (iterator.hasNext()) {
+            Session session = iterator.next();
+            String id = session.getId();
+            if (id.equals(wsSessionId)) {
+                return session;
+            }
+        }
+        return null;
+    }
 
     @OnOpen
     public void onOpen(Session session) {
@@ -92,13 +101,14 @@ public class WebSocketServerEndpoint {
                     }
                 }
                 break;
+
             case "request/users":
                 if (webSocketMessage.getIdentity().verify()) {
                     try {
                         JSONArray allUsers = User.getAllUsers();
                         JSONObject temp = new JSONObject();
                         temp.put("users", allUsers);
-                        OutboundWebSocketMessage webSocketMessage1 = new OutboundWebSocketMessage("bookkeeping/users", temp);
+                        OutboundWebSocketMessage webSocketMessage1 = new OutboundWebSocketMessage("bookkeeping/users", temp, webSocketMessage.getIdentity().getUser());
                         webSocketMessage1.setTo(new User(webSocketMessage.getIdentity().getUuid()));
                         webSocketMessage1.dispatch();
                     } catch (SQLException e) {
@@ -116,7 +126,7 @@ public class WebSocketServerEndpoint {
                             Session session1 = WebSocketServerEndpoint.getSessionById(user.getWsSessionId());
                             if (session1 != null)
                                 while (iterator.hasNext()) {
-                                    OutboundWebSocketMessage message = new OutboundWebSocketMessage("message/personal", iterator.next().toJSON());
+                                    OutboundWebSocketMessage message = new OutboundWebSocketMessage("message/personal", iterator.next().toJSON(), user);
                                     session1.getAsyncRemote().sendText(message.toString());
                                 }
                         }
@@ -125,8 +135,30 @@ public class WebSocketServerEndpoint {
                     e.printStackTrace();
                 }
                 break;
-        }
 
+            case "event/create":
+                if (webSocketMessage.getIdentity().verify()) {
+                    Event event = new Event(webSocketMessage.getData());
+                    try {
+                        event.saveToDatabase();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                break;
+            case "event/get/all":
+                if (webSocketMessage.getIdentity().verify()) {
+                    List<Event> all = Event.getAll();
+                    JSONArray array = new JSONArray();
+                    for (Event event : all) {
+                        array.put(event.toJSON());
+                    }
+                    OutboundWebSocketMessage webSocketMessage1 = new OutboundWebSocketMessage("event/get/all", new JSONObject().put("data", array), webSocketMessage.getIdentity().getUser());
+                    webSocketMessage1.send(session);
+                }
+                break;
+        }
     }
 
     private void handleHandShakeMessage(Identity identity, Session session) {
@@ -142,7 +174,6 @@ public class WebSocketServerEndpoint {
         }
     }
 
-
     @OnMessage
     public void onMessage(ByteBuffer byteBuffer, Session session1) {
         System.out.println("OnMessage" + session1.getId());
@@ -156,19 +187,6 @@ public class WebSocketServerEndpoint {
         }
         */
     }
-
-    public static Session getSessionById(String wsSessionId) {
-        Iterator<Session> iterator = sessions.iterator();
-        while (iterator.hasNext()) {
-            Session session = iterator.next();
-            String id = session.getId();
-            if (id.equals(wsSessionId)) {
-                return session;
-            }
-        }
-        return null;
-    }
-
 
     public OutboundWebSocketMessage getGroupCreationSuccessfulResponse(Group group) {
         OutboundWebSocketMessage outboundWebSocketMessage = new OutboundWebSocketMessage();

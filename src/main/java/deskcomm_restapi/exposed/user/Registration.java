@@ -1,6 +1,5 @@
 package deskcomm_restapi.exposed.user;
 
-import deskcomm_restapi.core.Keys;
 import deskcomm_restapi.core.User;
 import deskcomm_restapi.core.UserBuilder;
 import deskcomm_restapi.exceptions.InsufficientParamException;
@@ -11,6 +10,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.sql.SQLException;
 
+import static deskcomm_restapi.core.Keys.*;
+
 /**
  * Created by Jay Rathod on 06-01-2017.
  */
@@ -18,11 +19,10 @@ import java.sql.SQLException;
 public class Registration {
 
 
-
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public String register(@FormParam(Keys.USER_FIRSTNAME) String fname, @FormParam(Keys.USER_LASTNAME) String lname, @FormParam(Keys.USER_EMAIL) String email, @FormParam(Keys.USER_PASSWORD) String password, @FormParam(Keys.USER_UID) String uid, @FormParam(Keys.USER_IMG_URL) String imgUrl, @FormParam("mobile") String mobile) throws InsufficientParamException {
+    public String register(@FormParam(USER_FIRSTNAME) String fname, @FormParam(USER_LASTNAME) String lname, @FormParam(USER_EMAIL) String email, @FormParam(USER_PASSWORD) String password, @FormParam(USER_IMG_URL) String imgUrl, @FormParam("mobile") String mobile, @FormParam("gender") String gender) throws InsufficientParamException {
 
 
         try {
@@ -31,18 +31,18 @@ public class Registration {
             builder.setLastname(lname);
             builder.setEmail(email);
             builder.setPassword(password);
-            builder.setUid(uid);
             builder.setMobile(mobile);
-            builder.setImage_url(imgUrl);
+            builder.setImage_url("asdf");
+            builder.setGender(gender);
             if (builder.build()) {
                 JSONObject jsonObject = new JSONObject();
-                return jsonObject.accumulate(Keys.JSON_RESULT, true).accumulate(Keys.JSON_ERROR_TYPE, Keys.ERROR_NONE).toString();
+                return jsonObject.accumulate(JSON_RESULT, true).put(JSON_MESSAGE, "Signup Successful").accumulate(JSON_ERROR_TYPE, ERROR_NONE).toString();
             } else {
-                return new JSONObject().accumulate(Keys.JSON_RESULT, false).accumulate(Keys.JSON_ERROR_TYPE, Keys.ERROR_UNKNOWN).toString();
+                return new JSONObject().accumulate(JSON_RESULT, false).accumulate(JSON_ERROR_TYPE, ERROR_UNKNOWN).toString();
             }
         } catch (InvalidParamException e) {
             e.printStackTrace();
-            JSONObject jsonObject = new JSONObject().accumulate(Keys.JSON_RESULT, false).accumulate(Keys.JSON_ERROR_TYPE, Keys.ERROR_KNOWN).accumulate(Keys.JSON_MESSAGE, e.getMessage());
+            JSONObject jsonObject = new JSONObject().accumulate(JSON_RESULT, false).accumulate(JSON_ERROR_TYPE, ERROR_KNOWN).accumulate(JSON_MESSAGE, e.getMessage());
             return jsonObject.toString();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -55,7 +55,7 @@ public class Registration {
                 else if (e.getMessage().contains("uid"))
                     message = "An account with provided EID already exists";
             }
-            return new JSONObject().accumulate(Keys.JSON_RESULT, true).accumulate(Keys.JSON_ERROR_TYPE, Keys.ERROR_KNOWN).accumulate(Keys.JSON_MESSAGE, message).toString();
+            return new JSONObject().accumulate(JSON_RESULT, true).accumulate(JSON_ERROR_TYPE, ERROR_KNOWN).accumulate(JSON_MESSAGE, message).toString();
         }
         //     JsonObjectBuilder builder = Json.createObjectBuilder().add(Keys.JSON_RESULT, false).add(Keys.JSON_ERROR_TYPE, Keys.ERROR_UNKNOWN);
         //    return builder.build();
