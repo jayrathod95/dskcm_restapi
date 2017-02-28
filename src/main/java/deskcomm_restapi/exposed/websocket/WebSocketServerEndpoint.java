@@ -4,6 +4,7 @@ import deskcomm_restapi.core.*;
 import deskcomm_restapi.core.messages.InboundGroupMessage;
 import deskcomm_restapi.core.messages.InboundPersonalMessage;
 import deskcomm_restapi.core.messages.OutboundPersonalMessage;
+import deskcomm_restapi.dbconn.DbConnection;
 import deskcomm_restapi.support.L;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -14,6 +15,8 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import java.nio.ByteBuffer;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -158,6 +161,23 @@ public class WebSocketServerEndpoint {
                     webSocketMessage1.send(session);
                 }
                 break;
+
+            case "message/personal/received":
+                String id = webSocketMessage.getData().getString("id");
+                processMessageAcknowlegent(id);
+                break;
+        }
+    }
+
+    public void processMessageAcknowlegent(String id) {
+        try {
+            Connection connection = DbConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement("DELETE  FROM users_messages  WHERE `_uuid`=?");
+
+            statement.setString(1, id);
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

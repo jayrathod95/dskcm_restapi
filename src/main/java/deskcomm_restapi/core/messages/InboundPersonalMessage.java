@@ -93,7 +93,7 @@ public class InboundPersonalMessage extends Message {
     @Override
     public void dispatch() {
 
-        OutboundWebSocketMessage message = new OutboundWebSocketMessage("message/personal", toJSON(), user);
+        OutboundWebSocketMessage message = new OutboundWebSocketMessage("message/personal", toJSON(), new User(toUuid));
 
 
         User toUser = new User(toUuid);

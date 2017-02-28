@@ -14,9 +14,10 @@ public class OutboundWebSocketMessage {
     private JSONObject data;
     private User toUser;
 
-    public OutboundWebSocketMessage(String path, JSONObject data, User user) {
+    public OutboundWebSocketMessage(String path, JSONObject data, User toUser) {
         this.path = path;
         this.data = data;
+        this.toUser = toUser;
     }
 
     public OutboundWebSocketMessage() {

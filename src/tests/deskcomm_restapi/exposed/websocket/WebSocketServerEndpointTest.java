@@ -8,6 +8,43 @@ import org.junit.Test;
  */
 public class WebSocketServerEndpointTest {
     @Test
+    public void getSessionById() throws Exception {
+
+    }
+
+    @Test
+    public void onOpen() throws Exception {
+
+    }
+
+    @Test
+    public void onMessage() throws Exception {
+
+    }
+
+    @Test
+    public void processMessageAcknowlegent() throws Exception {
+        WebSocketServerEndpoint webSocketServerEndpoint = new WebSocketServerEndpoint();
+        webSocketServerEndpoint.processMessageAcknowlegent("4402d5b1-0c61-4154-a1d4-1ea8ae5377e685768773-85e7-46f3-a6b4-eafc279e938d");
+
+    }
+
+    @Test
+    public void onMessage1() throws Exception {
+
+    }
+
+    @Test
+    public void getGroupCreationSuccessfulResponse() throws Exception {
+
+    }
+
+    @Test
+    public void getGroupCreationFailedResponse() throws Exception {
+
+    }
+
+    @Test
     public void onClose() throws Exception {
         User.updateStatusAsOffline("81a8b89e-cff0-41e9-b6b6-3e57d493012a");
     }
