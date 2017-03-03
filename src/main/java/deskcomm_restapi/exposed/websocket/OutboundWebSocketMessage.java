@@ -24,6 +24,11 @@ public class OutboundWebSocketMessage {
 
     }
 
+    public OutboundWebSocketMessage(String s, JSONObject data) {
+        path = s;
+        this.data = data;
+    }
+
     public void setPath(String path) {
         this.path = path;
     }
@@ -48,7 +53,7 @@ public class OutboundWebSocketMessage {
 
     public void dispatch() {
         if (toUser.isOnline()) {
-            Session session = WebSocketServerEndpoint.getSessionById(toUser.getWsSessionId());
+            Session session = WebSocketServerEndpoint.getSessionBySessionId(toUser.getWsSessionId());
             if (session != null)
                 session.getAsyncRemote().sendText(this.toString());
         }

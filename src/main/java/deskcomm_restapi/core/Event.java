@@ -156,6 +156,42 @@ public class Event {
         this.imageUrl = imageUrl;
     }
 
+    public int getInterestedUsersCount() {
+        int i = 0;
+        try {
+            Connection connection = DbConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement("SELECT COUNT(1) FROM events_interested_users WHERE event_id=?");
+            statement.setString(1, uuid);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) i = resultSet.getInt(1);
+            resultSet.close();
+            statement.close();
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return i;
+    }
+
+    public List<String> getInterestedUsers() {
+        List<String> userList = new ArrayList<>();
+        try {
+            Connection connection = DbConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement("SELECT user_id FROM events_interested_users WHERE event_id=?");
+            statement.setString(1, uuid);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                userList.add(resultSet.getString(1));
+            }
+            resultSet.close();
+            statement.close();
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return userList;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -218,6 +254,34 @@ public class Event {
             resultSet.close();
             statement1.close();
             connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean setInterested(User user, boolean b) {
+        try {
+            Connection connection = DbConnection.getConnection();
+            if (b) {
+                PreparedStatement statement = connection.prepareStatement("INSERT INTO events_interested_users(event_id, user_id) VALUE (?,?)");
+                statement.setString(1, uuid);
+                statement.setString(2, user.getUuid());
+                statement.executeUpdate();
+                int updateCount = statement.getUpdateCount();
+                statement.close();
+                statement.close();
+                return updateCount > 0;
+            } else {
+                PreparedStatement statement = connection.prepareStatement("DELETE FROM events_interested_users WHERE event_id=? AND user_id=?");
+                statement.setString(1, uuid);
+                statement.setString(2, user.getUuid());
+                statement.executeUpdate();
+                int updateCount = statement.getUpdateCount();
+                statement.close();
+                statement.close();
+                return updateCount > 0;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

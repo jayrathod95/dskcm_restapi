@@ -24,8 +24,6 @@ public class WebSocketServerEndpointTest {
 
     @Test
     public void processMessageAcknowlegent() throws Exception {
-        WebSocketServerEndpoint webSocketServerEndpoint = new WebSocketServerEndpoint();
-        webSocketServerEndpoint.processMessageAcknowlegent("4402d5b1-0c61-4154-a1d4-1ea8ae5377e685768773-85e7-46f3-a6b4-eafc279e938d");
 
     }
 
@@ -51,7 +49,7 @@ public class WebSocketServerEndpointTest {
 
     @Test
     public void storeMessage() throws Exception {
-        WebSocketServerEndpoint socketServerEndpoint = new WebSocketServerEndpoint();
+        // WebSocketServerEndpoint socketServerEndpoint = new WebSocketServerEndpoint();
 
 
     }

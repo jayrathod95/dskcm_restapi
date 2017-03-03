@@ -67,6 +67,7 @@ public class Keys {
     public static final String EVENT_IMAGE_URL = "img_url";
     public static final String EVENT_CREATED_BY = "created_by";
     public static final String EVENT_ID = "id";
+    public static final String INTERESTED_USERS_COUNT = "int_users";
 
     public static class JSON {
         public static final String RESULT = "Result";

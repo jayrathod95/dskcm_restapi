@@ -17,11 +17,7 @@ import java.util.UUID;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 
-/**
- * MultiPart resource
- *
- * @author Arul Dhesiaseelan (aruld@acm.org)
- */
+
 @Path("multipart")
 public class MultiPartResource {
 

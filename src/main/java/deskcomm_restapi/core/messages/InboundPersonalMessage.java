@@ -98,7 +98,7 @@ public class InboundPersonalMessage extends Message {
 
         User toUser = new User(toUuid);
         if (toUser.isOnline()) {
-            Session session = WebSocketServerEndpoint.getSessionById(toUser.getWsSessionId());
+            Session session = WebSocketServerEndpoint.getSessionBySessionId(toUser.getWsSessionId());
             if (session != null)
                 session.getAsyncRemote().sendText(message.toString());
         }

@@ -2,6 +2,7 @@ package deskcomm_restapi.exposed.event;
 
 import deskcomm_restapi.core.Event;
 import deskcomm_restapi.core.Identity;
+import deskcomm_restapi.exposed.websocket.WebSocketServerEndpoint;
 import deskcomm_restapi.support.ErrorCode;
 import deskcomm_restapi.support.ErrorType;
 import deskcomm_restapi.support.Response1;
@@ -40,6 +41,8 @@ public class CreateEvent {
                     response1.setMessage("Event Created Successfully");
                     response1.setErrorType(ErrorType.ERROR_NONE);
                     response1.setErrorCode(ErrorCode.NONE);
+                    //WebSocketServerEndpoint.pushEvent(event.getUuid());
+                    WebSocketServerEndpoint.pushEvent(event.getUuid());
                     return response1.toString();
                 } else {
                     Response1<JSONObject> response1 = new Response1<>();

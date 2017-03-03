@@ -6,6 +6,9 @@ import deskcomm_restapi.core.messages.InboundPersonalMessage;
 import deskcomm_restapi.core.messages.OutboundPersonalMessage;
 import deskcomm_restapi.dbconn.DbConnection;
 import deskcomm_restapi.support.L;
+import javafx.collections.FXCollections;
+import javafx.collections.MapChangeListener;
+import javafx.collections.ObservableMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -18,10 +21,8 @@ import java.nio.ByteBuffer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by Jay Rathod on 04-02-2017.
@@ -33,38 +34,81 @@ import java.util.Set;
 )
 
 public class WebSocketServerEndpoint {
-    //private static final Set<Session> sessions = Collections.synchronizedSet(new HashSet<Session>());
-    private static Set<Session> sessions = new HashSet<>();
+
+
+    private static ObservableMap<String, Session> observableSessionsMapId = FXCollections.observableHashMap();
+    private static ObservableMap<String, Session> observableSessionsMapUserId = FXCollections.observableHashMap();
+
+    static {
+        observableSessionsMapUserId.addListener(new MapChangeListener<String, Session>() {
+            @Override
+            public void onChanged(Change<? extends String, ? extends Session> change) {
+                pushOnlineUsers();
+            }
+        });
+        observableSessionsMapUserId.removeListener(new MapChangeListener<String, Session>() {
+            @Override
+            public void onChanged(Change<? extends String, ? extends Session> change) {
+                pushOnlineUsers();
+            }
+        });
+    }
+
+    // TODO: 3/2/2017
     private Object groupCreationSuccessfulResponse;
     private Object groupCreationFailedResponse;
 
-    public static Session getSessionById(String wsSessionId) {
-        Iterator<Session> iterator = sessions.iterator();
-        while (iterator.hasNext()) {
-            Session session = iterator.next();
-            String id = session.getId();
-            if (id.equals(wsSessionId)) {
-                return session;
-            }
+    private static void pushOnlineUsers() {
+        JSONArray array = new JSONArray(observableSessionsMapUserId.keySet());
+        observableSessionsMapUserId.forEach((s, session) -> session.getAsyncRemote().sendText(new OutboundWebSocketMessage("users/online", new JSONObject().put("data", array)).toString()));
+    }
+
+    public static Session getSessionBySessionId(String wsSessionId) {
+
+        return observableSessionsMapId.get(wsSessionId);
+    }
+
+    public static void pushEvents() {
+        List<Event> all = Event.getAll();
+        JSONArray array = new JSONArray();
+        for (Event event : all) {
+            JSONObject eventJsonObj = event.toJSON();
+            eventJsonObj.put(Keys.INTERESTED_USERS_COUNT, event.getInterestedUsersCount());
+            array.put(eventJsonObj);
         }
-        return null;
+        observableSessionsMapUserId.forEach((s, session) -> session.getAsyncRemote().sendText(new OutboundWebSocketMessage("event/get/all", new JSONObject().put("data", array)).toString()));
+    }
+
+    public static void pushEvent(String eventId) {
+        Event event = new Event(eventId);
+        event.fetchFromDb();
+        observableSessionsMapUserId.forEach((s, session) -> session.getAsyncRemote().sendText(new OutboundWebSocketMessage("event/new", event.toJSON().put(Keys.INTERESTED_USERS_COUNT, event.getInterestedUsersCount())).toString()));
     }
 
     @OnOpen
     public void onOpen(Session session) {
-        sessions.add(session);
+        observableSessionsMapId.put(session.getId(), session);
         System.out.println("OnOpen" + session.getId());
     }
 
     @OnClose
     public void onClose(Session session) {
-        System.out.println("OnClose" + session.getId());
-        sessions.remove(session);
+        observableSessionsMapId.remove(session.getId());
+        Iterator<Session> sessionIterator = observableSessionsMapUserId.values().iterator();
+        Iterator<String> userIdIterator = observableSessionsMapUserId.keySet().iterator();
+        while (sessionIterator.hasNext()) {
+            if (sessionIterator.next().getId().equals(session.getId())) {
+                observableSessionsMapUserId.remove(userIdIterator.next());
+                break;
+            }
+            userIdIterator.next();
+        }
         User.updateStatusAsOffline(session.getId());
     }
 
     @OnMessage
     public void onMessage(String s, Session session) {
+
         L.P("OnMessage: WebSocketPacket : ", session.getId(), s);
         InboundWebSocketMessage webSocketMessage = new InboundWebSocketMessage(s);
         switch (webSocketMessage.getPath()) {
@@ -126,7 +170,7 @@ public class WebSocketServerEndpoint {
                         if (user.isOnline()) {
                             List<OutboundPersonalMessage> undeliveredMessages = user.getUndeliveredPersonalMessages();
                             Iterator<OutboundPersonalMessage> iterator = undeliveredMessages.iterator();
-                            Session session1 = WebSocketServerEndpoint.getSessionById(user.getWsSessionId());
+                            Session session1 = WebSocketServerEndpoint.getSessionBySessionId(user.getWsSessionId());
                             if (session1 != null)
                                 while (iterator.hasNext()) {
                                     OutboundWebSocketMessage message = new OutboundWebSocketMessage("message/personal", iterator.next().toJSON(), user);
@@ -155,17 +199,60 @@ public class WebSocketServerEndpoint {
                     List<Event> all = Event.getAll();
                     JSONArray array = new JSONArray();
                     for (Event event : all) {
-                        array.put(event.toJSON());
+                        JSONObject eventJsonObj = event.toJSON();
+                        eventJsonObj.put(Keys.INTERESTED_USERS_COUNT, event.getInterestedUsersCount());
+                        array.put(eventJsonObj);
                     }
                     OutboundWebSocketMessage webSocketMessage1 = new OutboundWebSocketMessage("event/get/all", new JSONObject().put("data", array), webSocketMessage.getIdentity().getUser());
                     webSocketMessage1.send(session);
                 }
                 break;
 
-            case "message/personal/received":
-                String id = webSocketMessage.getData().getString("id");
-                processMessageAcknowlegent(id);
+            case "event/get/int_users":
+                if (webSocketMessage.getIdentity().verify())
+                    new OutboundWebSocketMessage("event/int_users", new JSONObject().put("data", new Event(webSocketMessage.getData().getString(Keys.EVENT_ID)).getInterestedUsers())).send(session);
                 break;
+
+            case "message/personal/received":
+                processMessageAcknowlegent(webSocketMessage.getData().getString("id"));
+                break;
+            case "users/online":
+                pushOnlineUsers(session);
+                break;
+            case "event/interest/0":
+                if (webSocketMessage.getIdentity().verify()) {
+                    Event event = new Event(webSocketMessage.getData().getString(Keys.EVENT_ID));
+                    event.setInterested(webSocketMessage.getIdentity().getUser(), false);
+                    pushInterestedUsersCount(event);
+                }
+                break;
+            case "event/interest/1":
+                if (webSocketMessage.getIdentity().verify()) {
+                    Event event = new Event(webSocketMessage.getData().getString(Keys.EVENT_ID));
+                    event.setInterested(webSocketMessage.getIdentity().getUser(), true);
+                    pushInterestedUsersCount(event);
+                }
+                break;
+        }
+    }
+
+    private void pushInterestedUsersCount(Event event) {
+        JSONObject object = new JSONObject().put(Keys.EVENT_ID, event.getUuid())
+                .put(Keys.INTERESTED_USERS_COUNT, event.getInterestedUsersCount());
+        observableSessionsMapUserId.forEach((s, session) -> session.getAsyncRemote().sendText(new OutboundWebSocketMessage("int_users_count", object).toString()));
+    }
+
+    private void pushOnlineUsers(Session session) {
+        Iterator<String> iterator = observableSessionsMapId.keySet().iterator();
+        JSONArray array = new JSONArray();
+        try {
+            while (iterator.hasNext()) {
+                array.put(User.getUserWithWsSessionId(iterator.next()).getUuid());
+            }
+            OutboundWebSocketMessage webSocketMessage = new OutboundWebSocketMessage("users/online", new JSONObject().put("data", array));
+            webSocketMessage.send(session);
+        } catch (User.NoUserFoundException e) {
+            e.printStackTrace();
         }
     }
 
@@ -184,6 +271,7 @@ public class WebSocketServerEndpoint {
     private void handleHandShakeMessage(Identity identity, Session session) {
         if (identity.verify()) {
             User user = identity.getUser();
+            observableSessionsMapUserId.put(user.getUuid(), session);
             boolean b = user.updateStatusAsOnline(session.getId());
             OutboundWebSocketMessage webSocketMessage = new OutboundWebSocketMessage();
             webSocketMessage.setPath("response/" + Keys.HANDSHAKE_REQ);
